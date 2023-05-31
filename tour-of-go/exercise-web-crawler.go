@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"sync"
+	"time"
 )
 
 type Fetcher interface {
@@ -13,9 +15,10 @@ type Fetcher interface {
 // Crawl uses fetcher to recursively crawl
 // pages starting with url, to a maximum of depth.
 func Crawl(url string, depth int, fetcher Fetcher) {
-	// TODO: Fetch URLs in parallel.
+	// Fetch URLs in parallel.
 	// TODO: Don't fetch the same URL twice.
 	// This implementation doesn't do either:
+
 	if depth <= 0 {
 		return
 	}
@@ -25,11 +28,40 @@ func Crawl(url string, depth int, fetcher Fetcher) {
 		return
 	}
 	fmt.Printf("found: %s %q\n", url, body)
+
+	wg := &sync.WaitGroup{}
 	for _, u := range urls {
-		Crawl(u, depth-1, fetcher)
+		wg.Add(1)
+		go func(u string) {
+			Crawl(u, depth-1, fetcher)
+			wg.Done()
+		}(u)
 	}
+	wg.Wait()
+
 	return
 }
+
+// Crawl uses fetcher to recursively crawl
+// pages starting with url, to a maximum of depth.
+// func Crawl(url string, depth int, fetcher Fetcher) {
+// 	// TODO: Fetch URLs in parallel.
+// 	// TODO: Don't fetch the same URL twice.
+// 	// This implementation doesn't do either:
+// 	if depth <= 0 {
+// 		return
+// 	}
+// 	body, urls, err := fetcher.Fetch(url)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		return
+// 	}
+// 	fmt.Printf("found: %s %q\n", url, body)
+// 	for _, u := range urls {
+// 		Crawl(u, depth-1, fetcher)
+// 	}
+// 	return
+// }
 
 func main() {
 	Crawl("https://golang.org/", 4, fetcher)
@@ -44,6 +76,7 @@ type fakeResult struct {
 }
 
 func (f fakeFetcher) Fetch(url string) (string, []string, error) {
+	time.Sleep(time.Second)
 	if res, ok := f[url]; ok {
 		return res.body, res.urls, nil
 	}
