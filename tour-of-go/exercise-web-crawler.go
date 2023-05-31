@@ -12,9 +12,7 @@ type Fetcher interface {
 	Fetch(url string) (body string, urls []string, err error)
 }
 
-// Crawl uses fetcher to recursively crawl
-// pages starting with url, to a maximum of depth.
-func Crawl(url string, depth int, fetcher Fetcher) {
+func crawlInternal(url string, depth int, fetcher Fetcher, cache *sync.Map) {
 	// Fetch URLs in parallel.
 	// TODO: Don't fetch the same URL twice.
 	// This implementation doesn't do either:
@@ -22,6 +20,13 @@ func Crawl(url string, depth int, fetcher Fetcher) {
 	if depth <= 0 {
 		return
 	}
+
+	if _, ok := cache.Load(url); ok {
+		return
+	}
+
+	cache.Store(url, true)
+
 	body, urls, err := fetcher.Fetch(url)
 	if err != nil {
 		fmt.Println(err)
@@ -33,13 +38,20 @@ func Crawl(url string, depth int, fetcher Fetcher) {
 	for _, u := range urls {
 		wg.Add(1)
 		go func(u string) {
-			Crawl(u, depth-1, fetcher)
+			crawlInternal(u, depth-1, fetcher, cache)
 			wg.Done()
 		}(u)
 	}
 	wg.Wait()
 
 	return
+}
+
+// Crawl uses fetcher to recursively crawl
+// pages starting with url, to a maximum of depth.
+func Crawl(url string, depth int, fetcher Fetcher) {
+	cache := &sync.Map{}
+	crawlInternal(url, depth, fetcher, cache)
 }
 
 // Crawl uses fetcher to recursively crawl
