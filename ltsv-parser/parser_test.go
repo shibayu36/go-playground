@@ -20,16 +20,26 @@ func TestParse(t *testing.T) {
 }
 
 func TestLineToLog(t *testing.T) {
-	p := Parser{filename: "./testdata/log.ltsv"}
-	log, err := p.lineToLog("host:127.0.0.1	user:-	epoch:1372894390	req:GET /apache_pb.gif HTTP/1.0	status:302	size:9999	referer:http://www.example.com/start.html")
+	t.Run("valid line", func(t *testing.T) {
+		p := Parser{filename: "./testdata/log.ltsv"}
+		log, err := p.lineToLog("host:127.0.0.1	user:-	epoch:1372894390	req:GET /apache_pb.gif HTTP/1.0	status:302	size:9999	referer:http://www.example.com/start.html")
 
-	assert.Nil(t, err)
+		assert.Nil(t, err)
 
-	assert.Equal(t, "127.0.0.1", log.Host)
-	assert.Equal(t, "", log.User)
-	assert.Equal(t, 1372894390, log.Epoch)
-	assert.Equal(t, "GET /apache_pb.gif HTTP/1.0", log.Req)
-	assert.Equal(t, 302, log.Status)
-	assert.Equal(t, 9999, log.Size)
-	assert.Equal(t, "http://www.example.com/start.html", log.Referer)
+		assert.Equal(t, "127.0.0.1", log.Host)
+		assert.Equal(t, "", log.User)
+		assert.Equal(t, 1372894390, log.Epoch)
+		assert.Equal(t, "GET /apache_pb.gif HTTP/1.0", log.Req)
+		assert.Equal(t, 302, log.Status)
+		assert.Equal(t, 9999, log.Size)
+		assert.Equal(t, "http://www.example.com/start.html", log.Referer)
+	})
+
+	t.Run("invalid line", func(t *testing.T) {
+		p := Parser{filename: "./testdata/log.ltsv"}
+		log, err := p.lineToLog("host:127.0.0.1	user:-	epoch:aiu	req:GET /apache_pb.gif HTTP/1.0	status:302	size:9999	referer:http://www.example.com/start.html")
+
+		assert.NotNil(t, err)
+		assert.Nil(t, log)
+	})
 }
