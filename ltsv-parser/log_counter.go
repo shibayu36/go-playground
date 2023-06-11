@@ -13,3 +13,15 @@ func (lc LogCounter) CountError() int {
 	}
 	return count
 }
+
+func (lc LogCounter) GroupByUser() map[string][]Log {
+	group := make(map[string][]Log)
+	for _, log := range lc.Logs {
+		user := log.User
+		if user == "" {
+			user = "guest"
+		}
+		group[user] = append(group[user], log)
+	}
+	return group
+}
