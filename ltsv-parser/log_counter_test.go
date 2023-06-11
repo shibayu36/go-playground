@@ -7,12 +7,10 @@ import (
 )
 
 func TestLogCounterCountError(t *testing.T) {
+	parser := Parser{filename: "./testdata/log_for_counter.ltsv"}
+	logs, _ := parser.Parse()
 	lc := LogCounter{
-		Logs: []Log{
-			{
-				Status: 200,
-			},
-		},
+		Logs: logs,
 	}
-	assert.Equal(t, 0, lc.CountError())
+	assert.Equal(t, 2, lc.CountError())
 }

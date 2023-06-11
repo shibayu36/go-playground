@@ -5,5 +5,11 @@ type LogCounter struct {
 }
 
 func (lc LogCounter) CountError() int {
-	return 0
+	var count int
+	for _, log := range lc.Logs {
+		if log.Status >= 500 {
+			count++
+		}
+	}
+	return count
 }
