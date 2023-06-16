@@ -5,13 +5,13 @@ import (
 )
 
 // API 定義
-var _ = API("calc", func() {
+var _ = API("diary", func() {
 	// API の説明（タイトルと説明）
-	Title("Calculator Service")
-	Description("Service for adding numbers, a Goa teaser")
+	Title("Diary Service")
+	Description("Service for Diary")
 
 	// サーバ定義
-	Server("calc", func() {
+	Server("diary", func() {
 		Host("localhost", func() {
 			URI("http://localhost:8000") // HTTP REST API
 			URI("grpc://localhost:8080") // gRPC
@@ -20,6 +20,7 @@ var _ = API("calc", func() {
 })
 
 // サービス定義
+// This is not necessary for diary service, but I placed it for example.
 var _ = Service("calc", func() {
 	// 説明
 	Description("The calc service performs operations on numbers.")
