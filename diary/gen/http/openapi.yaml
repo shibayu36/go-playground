@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
-    title: Calculator Service
-    description: Service for adding numbers, a Goa teaser
+    title: Diary Service
+    description: Service for Diary
     version: ""
 host: localhost:8000
 consumes:
