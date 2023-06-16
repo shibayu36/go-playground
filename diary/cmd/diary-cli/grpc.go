@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	cli "github.com/shibayu36/go-playground/diary/gen/grpc/cli/calc"
+	cli "github.com/shibayu36/go-playground/diary/gen/grpc/cli/diary"
 	goa "goa.design/goa/v3/pkg"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	cli "github.com/shibayu36/go-playground/diary/gen/http/cli/calc"
+	cli "github.com/shibayu36/go-playground/diary/gen/http/cli/diary"
 	goahttp "goa.design/goa/v3/http"
 	goa "goa.design/goa/v3/pkg"
 )

@@ -12,7 +12,7 @@ import (
 	"sync"
 	"syscall"
 
-	calcapi "github.com/shibayu36/go-playground/diary"
+	diary "github.com/shibayu36/go-playground/diary"
 	calc "github.com/shibayu36/go-playground/diary/gen/calc"
 )
 
@@ -34,7 +34,7 @@ func main() {
 		logger *log.Logger
 	)
 	{
-		logger = log.New(os.Stderr, "[calcapi] ", log.Ltime)
+		logger = log.New(os.Stderr, "[diary] ", log.Ltime)
 	}
 
 	// Initialize the services.
@@ -42,7 +42,7 @@ func main() {
 		calcSvc calc.Service
 	)
 	{
-		calcSvc = calcapi.NewCalc(logger)
+		calcSvc = diary.NewCalc(logger)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services
