@@ -56,3 +56,24 @@ var _ = Service("calc", func() {
 		})
 	})
 })
+
+var _ = Service("user", func() {
+	Method("signup", func() {
+		Payload(func() {
+			Attribute("name", String, func() {
+				Description("User name")
+			})
+			Attribute("email", String, func() {
+				Description("User email")
+			})
+			Required("name", "email")
+		})
+
+		Result(Empty)
+
+		HTTP(func() {
+			POST("/signup")
+			Response(StatusCreated)
+		})
+	})
+})
