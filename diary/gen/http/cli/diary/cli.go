@@ -14,6 +14,7 @@ import (
 	"os"
 
 	calcc "github.com/shibayu36/go-playground/diary/gen/http/calc/client"
+	userc "github.com/shibayu36/go-playground/diary/gen/http/user/client"
 	goahttp "goa.design/goa/v3/http"
 	goa "goa.design/goa/v3/pkg"
 )
@@ -23,12 +24,17 @@ import (
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() string {
 	return `calc add
+user signup
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` calc add --a 6457667118415694695 --b 6119335670360450435` + "\n" +
+	return os.Args[0] + ` calc add --a 5893221964760752099 --b 6833182921217652119` + "\n" +
+		os.Args[0] + ` user signup --body '{
+      "email": "Itaque accusamus ducimus distinctio ab.",
+      "name": "Et consequatur quis aperiam assumenda ea dicta."
+   }'` + "\n" +
 		""
 }
 
@@ -47,9 +53,17 @@ func ParseEndpoint(
 		calcAddFlags = flag.NewFlagSet("add", flag.ExitOnError)
 		calcAddAFlag = calcAddFlags.String("a", "REQUIRED", "Left operand")
 		calcAddBFlag = calcAddFlags.String("b", "REQUIRED", "Right operand")
+
+		userFlags = flag.NewFlagSet("user", flag.ContinueOnError)
+
+		userSignupFlags    = flag.NewFlagSet("signup", flag.ExitOnError)
+		userSignupBodyFlag = userSignupFlags.String("body", "REQUIRED", "")
 	)
 	calcFlags.Usage = calcUsage
 	calcAddFlags.Usage = calcAddUsage
+
+	userFlags.Usage = userUsage
+	userSignupFlags.Usage = userSignupUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -68,6 +82,8 @@ func ParseEndpoint(
 		switch svcn {
 		case "calc":
 			svcf = calcFlags
+		case "user":
+			svcf = userFlags
 		default:
 			return nil, nil, fmt.Errorf("unknown service %q", svcn)
 		}
@@ -87,6 +103,13 @@ func ParseEndpoint(
 			switch epn {
 			case "add":
 				epf = calcAddFlags
+
+			}
+
+		case "user":
+			switch epn {
+			case "signup":
+				epf = userSignupFlags
 
 			}
 
@@ -116,6 +139,13 @@ func ParseEndpoint(
 			case "add":
 				endpoint = c.Add()
 				data, err = calcc.BuildAddPayload(*calcAddAFlag, *calcAddBFlag)
+			}
+		case "user":
+			c := userc.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "signup":
+				endpoint = c.Signup()
+				data, err = userc.BuildSignupPayload(*userSignupBodyFlag)
 			}
 		}
 	}
@@ -147,6 +177,33 @@ Add implements add.
     -b INT: Right operand
 
 Example:
-    %[1]s calc add --a 6457667118415694695 --b 6119335670360450435
+    %[1]s calc add --a 5893221964760752099 --b 6833182921217652119
+`, os.Args[0])
+}
+
+// userUsage displays the usage of the user command and its subcommands.
+func userUsage() {
+	fmt.Fprintf(os.Stderr, `Service is the user service interface.
+Usage:
+    %[1]s [globalflags] user COMMAND [flags]
+
+COMMAND:
+    signup: Signup implements signup.
+
+Additional help:
+    %[1]s user COMMAND --help
+`, os.Args[0])
+}
+func userSignupUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] user signup -body JSON
+
+Signup implements signup.
+    -body JSON: 
+
+Example:
+    %[1]s user signup --body '{
+      "email": "Itaque accusamus ducimus distinctio ab.",
+      "name": "Et consequatur quis aperiam assumenda ea dicta."
+   }'
 `, os.Args[0])
 }

@@ -28,8 +28,8 @@ func UsageCommands() string {
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
 	return os.Args[0] + ` calc add --message '{
-      "a": 4828252833388769148,
-      "b": 4633141463459538947
+      "a": 7642381378015112190,
+      "b": 6622029363083257017
    }'` + "\n" +
 		""
 }
@@ -142,8 +142,8 @@ Add implements add.
 
 Example:
     %[1]s calc add --message '{
-      "a": 4828252833388769148,
-      "b": 4633141463459538947
+      "a": 7642381378015112190,
+      "b": 6622029363083257017
    }'
 `, os.Args[0])
 }

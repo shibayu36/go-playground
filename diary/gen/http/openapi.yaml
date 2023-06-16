@@ -38,3 +38,42 @@ paths:
                         format: int64
             schemes:
                 - http
+    /signup:
+        post:
+            tags:
+                - user
+            summary: signup user
+            operationId: user#signup
+            parameters:
+                - name: SignupRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/UserSignupRequestBody'
+                    required:
+                        - name
+                        - email
+            responses:
+                "201":
+                    description: Created response.
+            schemes:
+                - http
+definitions:
+    UserSignupRequestBody:
+        title: UserSignupRequestBody
+        type: object
+        properties:
+            email:
+                type: string
+                description: User email
+                example: Qui id hic vel est.
+            name:
+                type: string
+                description: User name
+                example: Et repellendus ullam autem.
+        example:
+            email: Occaecati laboriosam molestiae necessitatibus nobis velit.
+            name: Quia deleniti numquam vitae quaerat illo.
+        required:
+            - name
+            - email

@@ -20,9 +20,9 @@ paths:
                   schema:
                     type: integer
                     description: Left operand
-                    example: 5893221964760752099
+                    example: 5306390835913049855
                     format: int64
-                  example: 6833182921217652119
+                  example: 3160978443704013224
                 - name: b
                   in: path
                   description: Right operand
@@ -30,9 +30,9 @@ paths:
                   schema:
                     type: integer
                     description: Right operand
-                    example: 7140116186952596606
+                    example: 9026508154722457019
                     format: int64
-                  example: 2010670526842788830
+                  example: 3260178422097889492
             responses:
                 "200":
                     description: OK response.
@@ -40,10 +40,52 @@ paths:
                         application/json:
                             schema:
                                 type: integer
-                                example: 8848271190519208707
+                                example: 2834461579231717112
                                 format: int64
-                            example: 2689041657659083791
-components: {}
+                            example: 1087530282662262832
+    /signup:
+        post:
+            tags:
+                - user
+            summary: signup user
+            operationId: user#signup
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/SignupRequestBody'
+                        example:
+                            email: Itaque accusamus ducimus distinctio ab.
+                            name: Et consequatur quis aperiam assumenda ea dicta.
+            responses:
+                "201":
+                    description: Created response.
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                                format: binary
+components:
+    schemas:
+        SignupRequestBody:
+            type: object
+            properties:
+                email:
+                    type: string
+                    description: User email
+                    example: Laudantium sit.
+                name:
+                    type: string
+                    description: User name
+                    example: Eligendi et eligendi occaecati commodi facilis.
+            example:
+                email: Harum molestias facere atque unde.
+                name: Harum rem explicabo.
+            required:
+                - name
+                - email
 tags:
     - name: calc
       description: The calc service performs operations on numbers.
+    - name: user
