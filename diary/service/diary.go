@@ -1,4 +1,4 @@
-package diaryapi
+package service
 
 import (
 	"context"

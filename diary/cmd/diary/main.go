@@ -12,8 +12,8 @@ import (
 	"sync"
 	"syscall"
 
-	diaryapi "github.com/shibayu36/go-playground/diary"
 	diary "github.com/shibayu36/go-playground/diary/gen/diary"
+	service "github.com/shibayu36/go-playground/diary/service"
 )
 
 func main() {
@@ -33,7 +33,7 @@ func main() {
 		logger *log.Logger
 	)
 	{
-		logger = log.New(os.Stderr, "[diaryapi] ", log.Ltime)
+		logger = log.New(os.Stderr, "[diary] ", log.Ltime)
 	}
 
 	// Initialize the services.
@@ -41,7 +41,7 @@ func main() {
 		diarySvc diary.Service
 	)
 	{
-		diarySvc = diaryapi.NewDiary(logger)
+		diarySvc = service.NewDiary(logger)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services
