@@ -1,4 +1,4 @@
-package calcapi
+package diary
 
 import (
 	"context"
