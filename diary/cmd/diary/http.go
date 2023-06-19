@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	calc "github.com/shibayu36/go-playground/diary/gen/calc"
-	calcsvr "github.com/shibayu36/go-playground/diary/gen/http/calc/server"
+	diary "github.com/shibayu36/go-playground/diary/gen/diary"
+	diarysvr "github.com/shibayu36/go-playground/diary/gen/http/diary/server"
 	goahttp "goa.design/goa/v3/http"
 	httpmdlwr "goa.design/goa/v3/http/middleware"
 	"goa.design/goa/v3/middleware"
@@ -18,7 +18,7 @@ import (
 
 // handleHTTPServer starts configures and starts a HTTP server on the given
 // URL. It shuts down the server if any error is received in the error channel.
-func handleHTTPServer(ctx context.Context, u *url.URL, calcEndpoints *calc.Endpoints, wg *sync.WaitGroup, errc chan error, logger *log.Logger, debug bool) {
+func handleHTTPServer(ctx context.Context, u *url.URL, diaryEndpoints *diary.Endpoints, wg *sync.WaitGroup, errc chan error, logger *log.Logger, debug bool) {
 
 	// Setup goa log adapter.
 	var (
@@ -49,20 +49,20 @@ func handleHTTPServer(ctx context.Context, u *url.URL, calcEndpoints *calc.Endpo
 	// the service input and output data structures to HTTP requests and
 	// responses.
 	var (
-		calcServer *calcsvr.Server
+		diaryServer *diarysvr.Server
 	)
 	{
 		eh := errorHandler(logger)
-		calcServer = calcsvr.New(calcEndpoints, mux, dec, enc, eh, nil)
+		diaryServer = diarysvr.New(diaryEndpoints, mux, dec, enc, eh, nil)
 		if debug {
 			servers := goahttp.Servers{
-				calcServer,
+				diaryServer,
 			}
 			servers.Use(httpmdlwr.Debug(mux, os.Stdout))
 		}
 	}
 	// Configure the mux.
-	calcsvr.Mount(mux, calcServer)
+	diarysvr.Mount(mux, diaryServer)
 
 	// Wrap the multiplexer with additional middlewares. Middlewares mounted
 	// here apply to all the service endpoints.
@@ -75,7 +75,7 @@ func handleHTTPServer(ctx context.Context, u *url.URL, calcEndpoints *calc.Endpo
 	// Start HTTP server using default configuration, change the code to
 	// configure the server as required by your service.
 	srv := &http.Server{Addr: u.Host, Handler: handler, ReadHeaderTimeout: time.Second * 60}
-	for _, m := range calcServer.Mounts {
+	for _, m := range diaryServer.Mounts {
 		logger.Printf("HTTP %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
 	}
 

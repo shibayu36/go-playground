@@ -12,8 +12,8 @@ import (
 	"sync"
 	"syscall"
 
-	diary "github.com/shibayu36/go-playground/diary"
-	calc "github.com/shibayu36/go-playground/diary/gen/calc"
+	diaryapi "github.com/shibayu36/go-playground/diary"
+	diary "github.com/shibayu36/go-playground/diary/gen/diary"
 )
 
 func main() {
@@ -23,7 +23,6 @@ func main() {
 		hostF     = flag.String("host", "localhost", "Server host (valid values: localhost)")
 		domainF   = flag.String("domain", "", "Host domain name (overrides host domain specified in service design)")
 		httpPortF = flag.String("http-port", "", "HTTP port (overrides host HTTP port specified in service design)")
-		grpcPortF = flag.String("grpc-port", "", "gRPC port (overrides host gRPC port specified in service design)")
 		secureF   = flag.Bool("secure", false, "Use secure scheme (https or grpcs)")
 		dbgF      = flag.Bool("debug", false, "Log request and response bodies")
 	)
@@ -34,24 +33,24 @@ func main() {
 		logger *log.Logger
 	)
 	{
-		logger = log.New(os.Stderr, "[diary] ", log.Ltime)
+		logger = log.New(os.Stderr, "[diaryapi] ", log.Ltime)
 	}
 
 	// Initialize the services.
 	var (
-		calcSvc calc.Service
+		diarySvc diary.Service
 	)
 	{
-		calcSvc = diary.NewCalc(logger)
+		diarySvc = diaryapi.NewDiary(logger)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services
 	// potentially running in different processes.
 	var (
-		calcEndpoints *calc.Endpoints
+		diaryEndpoints *diary.Endpoints
 	)
 	{
-		calcEndpoints = calc.NewEndpoints(calcSvc)
+		diaryEndpoints = diary.NewEndpoints(diarySvc)
 	}
 
 	// Create channel used by both the signal handler and server goroutines
@@ -93,31 +92,7 @@ func main() {
 			} else if u.Port() == "" {
 				u.Host = net.JoinHostPort(u.Host, "80")
 			}
-			handleHTTPServer(ctx, u, calcEndpoints, &wg, errc, logger, *dbgF)
-		}
-
-		{
-			addr := "grpc://localhost:8080"
-			u, err := url.Parse(addr)
-			if err != nil {
-				logger.Fatalf("invalid URL %#v: %s\n", addr, err)
-			}
-			if *secureF {
-				u.Scheme = "grpcs"
-			}
-			if *domainF != "" {
-				u.Host = *domainF
-			}
-			if *grpcPortF != "" {
-				h, _, err := net.SplitHostPort(u.Host)
-				if err != nil {
-					logger.Fatalf("invalid URL %#v: %s\n", u.Host, err)
-				}
-				u.Host = net.JoinHostPort(h, *grpcPortF)
-			} else if u.Port() == "" {
-				u.Host = net.JoinHostPort(u.Host, "8080")
-			}
-			handleGRPCServer(ctx, u, calcEndpoints, &wg, errc, logger, *dbgF)
+			handleHTTPServer(ctx, u, diaryEndpoints, &wg, errc, logger, *dbgF)
 		}
 
 	default:
