@@ -20,45 +20,44 @@ var _ = API("diary", func() {
 })
 
 // サービス定義
-// This is not necessary for diary service, but I placed it for example.
-var _ = Service("calc", func() {
-	// 説明
-	Description("The calc service performs operations on numbers.")
+// var _ = Service("calc", func() {
+// 	// 説明
+// 	Description("The calc service performs operations on numbers.")
 
-	// メソッド (HTTPでいうところのエンドポントに相当)
-	Method("add", func() {
-		// ペイロード定義
-		Payload(func() {
-			// 整数型の属性 `a` これは左の被演算子
-			Attribute("a", Int, func() {
-				Description("Left operand") // 説明
-				Meta("rpc:tag", "1")        // gRPC 用のメタ情報。タグ定義
-			})
-			// 整数型の属性 `b` これは右の被演算子
-			Attribute("b", Int, func() {
-				Description("Right operand") // 説明
-				Meta("rpc:tag", "2")         // gRPC 用のメタ情報。タグ定義
-			})
-			Required("a", "b") // a と b は required な属性であることの指定
-		})
+// 	// メソッド (HTTPでいうところのエンドポントに相当)
+// 	Method("add", func() {
+// 		// ペイロード定義
+// 		Payload(func() {
+// 			// 整数型の属性 `a` これは左の被演算子
+// 			Attribute("a", Int, func() {
+// 				Description("Left operand") // 説明
+// 				Meta("rpc:tag", "1")        // gRPC 用のメタ情報。タグ定義
+// 			})
+// 			// 整数型の属性 `b` これは右の被演算子
+// 			Attribute("b", Int, func() {
+// 				Description("Right operand") // 説明
+// 				Meta("rpc:tag", "2")         // gRPC 用のメタ情報。タグ定義
+// 			})
+// 			Required("a", "b") // a と b は required な属性であることの指定
+// 		})
 
-		Result(Int) // メソッドの返値（整数を返す）
+// 		Result(Int) // メソッドの返値（整数を返す）
 
-		// HTTP トランスポート用の定義
-		HTTP(func() {
-			GET("/add/{a}/{b}") // GET エンドポイント
-			Response(StatusOK)  // レスポンスのステータスは Status OK = 200 を返す
-		})
+// 		// HTTP トランスポート用の定義
+// 		HTTP(func() {
+// 			GET("/add/{a}/{b}") // GET エンドポイント
+// 			Response(StatusOK)  // レスポンスのステータスは Status OK = 200 を返す
+// 		})
 
-		// GRPC トランスポート用の定義
-		GRPC(func() {
-			Response(CodeOK) // レスポンスのステータスは CodeOK を返す
-		})
-	})
-})
+// 		// GRPC トランスポート用の定義
+// 		GRPC(func() {
+// 			Response(CodeOK) // レスポンスのステータスは CodeOK を返す
+// 		})
+// 	})
+// })
 
-var _ = Service("user", func() {
-	Method("signup", func() {
+var _ = Service("diary", func() {
+	Method("UserSignup", func() {
 		Payload(func() {
 			Attribute("name", String, func() {
 				Description("User name")
