@@ -13,8 +13,7 @@ import (
 	"net/http"
 	"os"
 
-	calcc "github.com/shibayu36/go-playground/diary/gen/http/calc/client"
-	userc "github.com/shibayu36/go-playground/diary/gen/http/user/client"
+	diaryc "github.com/shibayu36/go-playground/diary/gen/http/diary/client"
 	goahttp "goa.design/goa/v3/http"
 	goa "goa.design/goa/v3/pkg"
 )
@@ -23,17 +22,15 @@ import (
 //
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() string {
-	return `calc add
-user signup
+	return `diary user-signup
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` calc add --a 5893221964760752099 --b 6833182921217652119` + "\n" +
-		os.Args[0] + ` user signup --body '{
-      "email": "Itaque accusamus ducimus distinctio ab.",
-      "name": "Et consequatur quis aperiam assumenda ea dicta."
+	return os.Args[0] + ` diary user-signup --body '{
+      "email": "Laudantium repellendus.",
+      "name": "Aliquid doloribus."
    }'` + "\n" +
 		""
 }
@@ -48,22 +45,13 @@ func ParseEndpoint(
 	restore bool,
 ) (goa.Endpoint, any, error) {
 	var (
-		calcFlags = flag.NewFlagSet("calc", flag.ContinueOnError)
+		diaryFlags = flag.NewFlagSet("diary", flag.ContinueOnError)
 
-		calcAddFlags = flag.NewFlagSet("add", flag.ExitOnError)
-		calcAddAFlag = calcAddFlags.String("a", "REQUIRED", "Left operand")
-		calcAddBFlag = calcAddFlags.String("b", "REQUIRED", "Right operand")
-
-		userFlags = flag.NewFlagSet("user", flag.ContinueOnError)
-
-		userSignupFlags    = flag.NewFlagSet("signup", flag.ExitOnError)
-		userSignupBodyFlag = userSignupFlags.String("body", "REQUIRED", "")
+		diaryUserSignupFlags    = flag.NewFlagSet("user-signup", flag.ExitOnError)
+		diaryUserSignupBodyFlag = diaryUserSignupFlags.String("body", "REQUIRED", "")
 	)
-	calcFlags.Usage = calcUsage
-	calcAddFlags.Usage = calcAddUsage
-
-	userFlags.Usage = userUsage
-	userSignupFlags.Usage = userSignupUsage
+	diaryFlags.Usage = diaryUsage
+	diaryUserSignupFlags.Usage = diaryUserSignupUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -80,10 +68,8 @@ func ParseEndpoint(
 	{
 		svcn = flag.Arg(0)
 		switch svcn {
-		case "calc":
-			svcf = calcFlags
-		case "user":
-			svcf = userFlags
+		case "diary":
+			svcf = diaryFlags
 		default:
 			return nil, nil, fmt.Errorf("unknown service %q", svcn)
 		}
@@ -99,17 +85,10 @@ func ParseEndpoint(
 	{
 		epn = svcf.Arg(0)
 		switch svcn {
-		case "calc":
+		case "diary":
 			switch epn {
-			case "add":
-				epf = calcAddFlags
-
-			}
-
-		case "user":
-			switch epn {
-			case "signup":
-				epf = userSignupFlags
+			case "user-signup":
+				epf = diaryUserSignupFlags
 
 			}
 
@@ -133,19 +112,12 @@ func ParseEndpoint(
 	)
 	{
 		switch svcn {
-		case "calc":
-			c := calcc.NewClient(scheme, host, doer, enc, dec, restore)
+		case "diary":
+			c := diaryc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
-			case "add":
-				endpoint = c.Add()
-				data, err = calcc.BuildAddPayload(*calcAddAFlag, *calcAddBFlag)
-			}
-		case "user":
-			c := userc.NewClient(scheme, host, doer, enc, dec, restore)
-			switch epn {
-			case "signup":
-				endpoint = c.Signup()
-				data, err = userc.BuildSignupPayload(*userSignupBodyFlag)
+			case "user-signup":
+				endpoint = c.UserSignup()
+				data, err = diaryc.BuildUserSignupPayload(*diaryUserSignupBodyFlag)
 			}
 		}
 	}
@@ -156,54 +128,29 @@ func ParseEndpoint(
 	return endpoint, data, nil
 }
 
-// calcUsage displays the usage of the calc command and its subcommands.
-func calcUsage() {
-	fmt.Fprintf(os.Stderr, `The calc service performs operations on numbers.
+// diaryUsage displays the usage of the diary command and its subcommands.
+func diaryUsage() {
+	fmt.Fprintf(os.Stderr, `Service is the diary service interface.
 Usage:
-    %[1]s [globalflags] calc COMMAND [flags]
+    %[1]s [globalflags] diary COMMAND [flags]
 
 COMMAND:
-    add: Add implements add.
+    user-signup: UserSignup implements UserSignup.
 
 Additional help:
-    %[1]s calc COMMAND --help
+    %[1]s diary COMMAND --help
 `, os.Args[0])
 }
-func calcAddUsage() {
-	fmt.Fprintf(os.Stderr, `%[1]s [flags] calc add -a INT -b INT
+func diaryUserSignupUsage() {
+	fmt.Fprintf(os.Stderr, `%[1]s [flags] diary user-signup -body JSON
 
-Add implements add.
-    -a INT: Left operand
-    -b INT: Right operand
-
-Example:
-    %[1]s calc add --a 5893221964760752099 --b 6833182921217652119
-`, os.Args[0])
-}
-
-// userUsage displays the usage of the user command and its subcommands.
-func userUsage() {
-	fmt.Fprintf(os.Stderr, `Service is the user service interface.
-Usage:
-    %[1]s [globalflags] user COMMAND [flags]
-
-COMMAND:
-    signup: Signup implements signup.
-
-Additional help:
-    %[1]s user COMMAND --help
-`, os.Args[0])
-}
-func userSignupUsage() {
-	fmt.Fprintf(os.Stderr, `%[1]s [flags] user signup -body JSON
-
-Signup implements signup.
+UserSignup implements UserSignup.
     -body JSON: 
 
 Example:
-    %[1]s user signup --body '{
-      "email": "Itaque accusamus ducimus distinctio ab.",
-      "name": "Et consequatur quis aperiam assumenda ea dicta."
+    %[1]s diary user-signup --body '{
+      "email": "Laudantium repellendus.",
+      "name": "Aliquid doloribus."
    }'
 `, os.Args[0])
 }

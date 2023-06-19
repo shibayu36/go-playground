@@ -6,58 +6,21 @@ info:
 servers:
     - url: http://localhost:8000
 paths:
-    /add/{a}/{b}:
-        get:
-            tags:
-                - calc
-            summary: add calc
-            operationId: calc#add
-            parameters:
-                - name: a
-                  in: path
-                  description: Left operand
-                  required: true
-                  schema:
-                    type: integer
-                    description: Left operand
-                    example: 5306390835913049855
-                    format: int64
-                  example: 3160978443704013224
-                - name: b
-                  in: path
-                  description: Right operand
-                  required: true
-                  schema:
-                    type: integer
-                    description: Right operand
-                    example: 9026508154722457019
-                    format: int64
-                  example: 3260178422097889492
-            responses:
-                "200":
-                    description: OK response.
-                    content:
-                        application/json:
-                            schema:
-                                type: integer
-                                example: 2834461579231717112
-                                format: int64
-                            example: 1087530282662262832
     /signup:
         post:
             tags:
-                - user
-            summary: signup user
-            operationId: user#signup
+                - diary
+            summary: UserSignup diary
+            operationId: diary#UserSignup
             requestBody:
                 required: true
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/SignupRequestBody'
+                            $ref: '#/components/schemas/UserSignupRequestBody'
                         example:
-                            email: Itaque accusamus ducimus distinctio ab.
-                            name: Et consequatur quis aperiam assumenda ea dicta.
+                            email: Laudantium repellendus.
+                            name: Aliquid doloribus.
             responses:
                 "201":
                     description: Created response.
@@ -68,24 +31,22 @@ paths:
                                 format: binary
 components:
     schemas:
-        SignupRequestBody:
+        UserSignupRequestBody:
             type: object
             properties:
                 email:
                     type: string
                     description: User email
-                    example: Laudantium sit.
+                    example: Qui id hic vel est.
                 name:
                     type: string
                     description: User name
-                    example: Eligendi et eligendi occaecati commodi facilis.
+                    example: Et repellendus ullam autem.
             example:
-                email: Harum molestias facere atque unde.
-                name: Harum rem explicabo.
+                email: Occaecati laboriosam molestiae necessitatibus nobis velit.
+                name: Quia deleniti numquam vitae quaerat illo.
             required:
                 - name
                 - email
 tags:
-    - name: calc
-      description: The calc service performs operations on numbers.
-    - name: user
+    - name: diary
