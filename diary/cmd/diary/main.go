@@ -12,7 +12,9 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/shibayu36/go-playground/diary/config"
 	diary "github.com/shibayu36/go-playground/diary/gen/diary"
+	"github.com/shibayu36/go-playground/diary/repository"
 	service "github.com/shibayu36/go-playground/diary/service"
 )
 
@@ -36,12 +38,24 @@ func main() {
 		logger = log.New(os.Stderr, "[diary] ", log.Ltime)
 	}
 
+	c, err := config.Load()
+	if err != nil {
+		logger.Fatal(fmt.Errorf("Loading config failed: %w", err))
+	}
+
+	// Initialize the repositories
+	repos, err := repository.NewRepositories(c.DbDsn)
+	if err != nil {
+		logger.Fatal(fmt.Errorf("Initializing repositories failed: %w", err))
+	}
+	defer repos.Close()
+
 	// Initialize the services.
 	var (
 		diarySvc diary.Service
 	)
 	{
-		diarySvc = service.NewDiary(logger)
+		diarySvc = service.NewDiary(logger, repos)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services
