@@ -1,0 +1,5 @@
+{
+    "go.testEnvVars": {
+        "DATABASE_DSN": "root:password@(127.0.0.1:3306)/diary_test"
+    }
+}
