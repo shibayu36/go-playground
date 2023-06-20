@@ -8,6 +8,8 @@ import (
 
 type Repositories struct {
 	User *UserRepository
+
+	db *sqlx.DB
 }
 
 func NewRepositories(dsn string) (*Repositories, error) {
@@ -17,9 +19,10 @@ func NewRepositories(dsn string) (*Repositories, error) {
 	}
 	return &Repositories{
 		User: NewUserRepository(db),
+		db:   db,
 	}, nil
 }
 
 func (r *Repositories) Close() error {
-	return r.User.db.Close()
+	return r.db.Close()
 }
