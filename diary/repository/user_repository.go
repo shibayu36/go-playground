@@ -17,6 +17,7 @@ func NewUserRepository(db *sqlx.DB) *UserRepository {
 }
 
 func (r *UserRepository) Create(email string, name string) error {
+	// TODO: Modify how to create now for testability
 	now := time.Now()
 	res, err := r.db.Exec(
 		`INSERT INTO users (email, name, created_at, updated_at)
