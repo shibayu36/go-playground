@@ -16,13 +16,13 @@ func (s *Stack[T]) IsEmpty() bool {
 	return len(*s) == 0
 }
 
-func main() {
-	var s Stack[int]
-	println(s.IsEmpty())
-	s.Push(1)
-	s.Push(2)
-	s.Push(3)
-	println(s.Pop())
-	println(s.Pop())
-	println(s.Pop())
-}
+// func main() {
+// 	var s Stack[int]
+// 	println(s.IsEmpty())
+// 	s.Push(1)
+// 	s.Push(2)
+// 	s.Push(3)
+// 	println(s.Pop())
+// 	println(s.Pop())
+// 	println(s.Pop())
+// }
