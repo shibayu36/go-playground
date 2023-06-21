@@ -38,3 +38,12 @@ func (r *UserRepository) Create(email string, name string) (*model.User, error) 
 	}
 	return user, nil
 }
+
+func (r *UserRepository) FindByID(id int64) (*model.User, error) {
+	var user model.User
+	err := r.db.Get(&user, "SELECT * FROM users WHERE user_id = ?", id)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
