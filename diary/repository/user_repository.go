@@ -1,11 +1,11 @@
 package repository
 
 import (
-	"fmt"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"github.com/shibayu36/go-playground/diary/model"
 )
 
 type UserRepository struct {
@@ -16,7 +16,7 @@ func NewUserRepository(db *sqlx.DB) *UserRepository {
 	return &UserRepository{db: db}
 }
 
-func (r *UserRepository) Create(email string, name string) error {
+func (r *UserRepository) Create(email string, name string) (*model.User, error) {
 	// TODO: Modify how to create now for testability
 	now := time.Now()
 	res, err := r.db.Exec(
@@ -25,12 +25,16 @@ func (r *UserRepository) Create(email string, name string) error {
 		email, name, now, now,
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	// TODO: Return *model.User
-
-	fmt.Println(res.LastInsertId())
-	fmt.Println(res.RowsAffected())
-	return err
+	id, _ := res.LastInsertId()
+	user := &model.User{
+		UserID:    id,
+		Email:     email,
+		Name:      name,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+	return user, nil
 }
