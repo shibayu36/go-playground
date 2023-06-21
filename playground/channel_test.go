@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"testing"
+)
 
 // func main() {
 // 	// if using buffered channel, it will not cause deadlock until 2 elements are added
@@ -11,7 +14,7 @@ import "fmt"
 // 	fmt.Println(<-ch)
 // }
 
-func main() {
+func TestChannel(t *testing.T) {
 	// if make(chan int) is used without goroutine, it will cause deadlock
 	ch := make(chan int)
 	ch <- 1

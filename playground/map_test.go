@@ -1,8 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"testing"
+)
 
-func main() {
+func TestMap(t *testing.T) {
 	hoge := map[string]int{
 		"foo": 1,
 		"bar": 2,
