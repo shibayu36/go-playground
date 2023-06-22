@@ -3,12 +3,16 @@ package repository
 import (
 	"testing"
 
+	"github.com/Songmu/flextime"
 	"github.com/shibayu36/go-playground/diary/config"
 	"github.com/shibayu36/go-playground/diary/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestUserRepositoryCreate(t *testing.T) {
+	restore := flextime.Fix(flextime.Now())
+	defer restore()
+
 	c, _ := config.Load()
 	repos, _ := NewRepositories(c.DbDsn)
 
@@ -21,6 +25,8 @@ func TestUserRepositoryCreate(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, email, user.Email)
 	assert.Equal(t, name, user.Name)
+	assert.Equal(t, flextime.Now(), user.CreatedAt)
+	assert.Equal(t, flextime.Now(), user.UpdatedAt)
 }
 
 func TestUserRepositoryFindByID(t *testing.T) {

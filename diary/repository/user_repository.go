@@ -1,8 +1,7 @@
 package repository
 
 import (
-	"time"
-
+	"github.com/Songmu/flextime"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/shibayu36/go-playground/diary/model"
@@ -17,8 +16,7 @@ func NewUserRepository(db *sqlx.DB) *UserRepository {
 }
 
 func (r *UserRepository) Create(email string, name string) (*model.User, error) {
-	// TODO: Modify how to create now for testability
-	now := time.Now()
+	now := flextime.Now()
 	res, err := r.db.Exec(
 		`INSERT INTO users (email, name, created_at, updated_at)
 			VALUES (?, ?, ?, ?)`,
