@@ -86,3 +86,16 @@ func TestTimeoutLoop(t *testing.T) {
 		}
 	}
 }
+
+func TestOverallTimeout(t *testing.T) {
+	ch := generator("Hello!")
+	timeout := time.After(3 * time.Second)
+	for i := 0; i < 5; i++ {
+		select {
+		case s := <-ch:
+			fmt.Println(s)
+		case <-timeout:
+			return
+		}
+	}
+}
