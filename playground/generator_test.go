@@ -17,6 +17,23 @@ func generator(msg string) <-chan string {
 	return ch
 }
 
+func generatorWithQuit(msg string, quit <-chan bool) <-chan string {
+	ch := make(chan string)
+	go func() {
+		for i := 0; ; i++ {
+			select {
+			case ch <- fmt.Sprintf("%s %d", msg, i):
+				time.Sleep(time.Second)
+			case <-quit:
+				fmt.Println("Quit!")
+				return
+			}
+		}
+	}()
+
+	return ch
+}
+
 func fanIn(ch1, ch2 <-chan string) <-chan string {
 	ch := make(chan string)
 	go func() {
@@ -95,6 +112,21 @@ func TestOverallTimeout(t *testing.T) {
 		case s := <-ch:
 			fmt.Println(s)
 		case <-timeout:
+			return
+		}
+	}
+}
+
+func TestOverallTimeoutWithQuit(t *testing.T) {
+	quit := make(chan bool)
+	ch := generatorWithQuit("Hello!", quit)
+	timeout := time.After(3 * time.Second)
+	for i := 0; i < 5; i++ {
+		select {
+		case s := <-ch:
+			fmt.Println(s)
+		case <-timeout:
+			quit <- true
 			return
 		}
 	}
