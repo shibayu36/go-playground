@@ -32,6 +32,21 @@ func fanIn(ch1, ch2 <-chan string) <-chan string {
 	return ch
 }
 
+func fanInBySelect(ch1, ch2 <-chan string) <-chan string {
+	ch := make(chan string)
+	go func() {
+		for {
+			select {
+			case s := <-ch1:
+				ch <- s
+			case s := <-ch2:
+				ch <- s
+			}
+		}
+	}()
+	return ch
+}
+
 func TestGenerator(t *testing.T) {
 	ch := generator("Hello!")
 	for i := 0; i < 5; i++ {
@@ -43,6 +58,16 @@ func TestFanIn(t *testing.T) {
 	ch1 := generator("Hello1!")
 	ch2 := generator("Hello2!")
 	ch := fanIn(ch1, ch2)
+
+	for i := 0; i < 10; i++ {
+		fmt.Println(<-ch)
+	}
+}
+
+func TestFanInBySelect(t *testing.T) {
+	ch1 := generator("Hello1!")
+	ch2 := generator("Hello2!")
+	ch := fanInBySelect(ch1, ch2)
 
 	for i := 0; i < 10; i++ {
 		fmt.Println(<-ch)
