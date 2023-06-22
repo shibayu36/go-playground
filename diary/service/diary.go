@@ -22,7 +22,10 @@ func NewDiary(logger *log.Logger, repos *repository.Repositories) diary.Service 
 
 // UserSignup implements UserSignup.
 func (s *diarysrvc) UserSignup(ctx context.Context, p *diary.UserSignupPayload) (err error) {
-	s.repos.User.Create()
-	s.logger.Print("diary.UserSignup")
+	// TODO:
+	// * Email Length, Format
+	// * Name Length, Name Available Characters
+	// * Duplication of Email or Name
+	_, err = s.repos.User.Create(p.Email, p.Name)
 	return
 }
