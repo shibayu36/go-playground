@@ -73,3 +73,16 @@ func TestFanInBySelect(t *testing.T) {
 		fmt.Println(<-ch)
 	}
 }
+
+func TestTimeoutLoop(t *testing.T) {
+	ch := generator("Hello!")
+	for i := 0; i < 5; i++ {
+		select {
+		case s := <-ch:
+			fmt.Println(s)
+		case <-time.After(1200 * time.Millisecond):
+			// case <-time.After(800 * time.Millisecond):
+			return
+		}
+	}
+}
