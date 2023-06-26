@@ -28,6 +28,7 @@ func NewClient(userSignup goa.Endpoint) *Client {
 // UserSignup calls the "UserSignup" endpoint of the "diary" service.
 // UserSignup may return the following errors:
 //   - "user_validation_error" (type *goa.ServiceError)
+//   - "user_duplication_error" (type *goa.ServiceError)
 //   - error: internal error
 func (c *Client) UserSignup(ctx context.Context, p *UserSignupPayload) (err error) {
 	_, err = c.UserSignupEndpoint(ctx, p)

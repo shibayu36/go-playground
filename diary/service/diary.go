@@ -24,14 +24,17 @@ func NewDiary(logger *log.Logger, repos *repository.Repositories) diary.Service 
 
 // UserSignup implements UserSignup.
 func (s *diarysrvc) UserSignup(ctx context.Context, p *diary.UserSignupPayload) (err error) {
-	// TODO:
-	// * Duplication of Email or Name
 	_, err = s.repos.User.Create(p.Email, p.Name)
 
 	if err != nil {
 		var validationError *model.ValidationError
 		if errors.As(err, &validationError) {
 			return diary.MakeUserValidationError(err)
+		}
+
+		var duplicationError *repository.DuplicationError
+		if errors.As(err, &duplicationError) {
+			return diary.MakeUserDuplicationError(err)
 		}
 	}
 

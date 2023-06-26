@@ -58,6 +58,7 @@ var _ = API("diary", func() {
 
 var _ = Service("diary", func() {
 	Error("user_validation_error")
+	Error("user_duplication_error")
 
 	Method("UserSignup", func() {
 		Payload(func() {

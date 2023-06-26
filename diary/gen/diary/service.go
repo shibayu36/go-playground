@@ -41,3 +41,8 @@ type UserSignupPayload struct {
 func MakeUserValidationError(err error) *goa.ServiceError {
 	return goa.NewServiceError(err, "user_validation_error", false, false, false)
 }
+
+// MakeUserDuplicationError builds a goa.ServiceError from an error.
+func MakeUserDuplicationError(err error) *goa.ServiceError {
+	return goa.NewServiceError(err, "user_duplication_error", false, false, false)
+}
