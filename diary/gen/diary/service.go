@@ -9,6 +9,8 @@ package diary
 
 import (
 	"context"
+
+	goa "goa.design/goa/v3/pkg"
 )
 
 // Service is the diary service interface.
@@ -33,4 +35,9 @@ type UserSignupPayload struct {
 	Name string
 	// User email
 	Email string
+}
+
+// MakeUserValidationError builds a goa.ServiceError from an error.
+func MakeUserValidationError(err error) *goa.ServiceError {
+	return goa.NewServiceError(err, "user_validation_error", false, false, false)
 }

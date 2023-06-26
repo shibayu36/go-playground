@@ -57,6 +57,8 @@ var _ = API("diary", func() {
 // })
 
 var _ = Service("diary", func() {
+	Error("user_validation_error")
+
 	Method("UserSignup", func() {
 		Payload(func() {
 			Attribute("name", String, func() {

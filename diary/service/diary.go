@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	diary "github.com/shibayu36/go-playground/diary/gen/diary"
+	"github.com/shibayu36/go-playground/diary/model"
 	"github.com/shibayu36/go-playground/diary/repository"
 )
 
@@ -23,9 +25,15 @@ func NewDiary(logger *log.Logger, repos *repository.Repositories) diary.Service 
 // UserSignup implements UserSignup.
 func (s *diarysrvc) UserSignup(ctx context.Context, p *diary.UserSignupPayload) (err error) {
 	// TODO:
-	// * Email Length, Format
-	// * Name Length, Name Available Characters
 	// * Duplication of Email or Name
 	_, err = s.repos.User.Create(p.Email, p.Name)
+
+	if err != nil {
+		var validationError *model.ValidationError
+		if errors.As(err, &validationError) {
+			return diary.MakeUserValidationError(err)
+		}
+	}
+
 	return
 }
