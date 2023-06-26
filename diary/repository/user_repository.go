@@ -16,6 +16,10 @@ func NewUserRepository(db *sqlx.DB) *UserRepository {
 }
 
 func (r *UserRepository) Create(email string, name string) (*model.User, error) {
+	if err := model.ValidateUser(email, name); err != nil {
+		return nil, err
+	}
+
 	now := flextime.Now()
 	res, err := r.db.Exec(
 		`INSERT INTO users (email, name, created_at, updated_at)
