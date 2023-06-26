@@ -27,6 +27,10 @@ func (r *UserRepository) Create(email string, name string) (*model.User, error) 
 		email, name, now, now,
 	)
 	if err != nil {
+		if IsDuplicationError(err) {
+			return nil, NewDuplicationError(err.Error())
+		}
+
 		return nil, err
 	}
 

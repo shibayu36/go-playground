@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/Songmu/flextime"
@@ -49,6 +50,28 @@ func TestUserRepositoryCreate(t *testing.T) {
 		)
 
 		assert.Equal(t, model.NewValidationError("email is invalid"), err)
+	})
+
+	t.Run("with duplicated email", func(t *testing.T) {
+		restore := flextime.Fix(flextime.Now())
+		defer restore()
+
+		c, _ := config.Load()
+		repos, _ := NewRepositories(c.DbDsn)
+
+		email := testutil.RandomEmail()
+		name := testutil.RandomString(10)
+
+		repos.User.Create(
+			email, name,
+		)
+
+		_, err := repos.User.Create(
+			email, name,
+		)
+
+		var dupErr *DuplicationError
+		assert.True(t, errors.As(err, &dupErr))
 	})
 }
 
