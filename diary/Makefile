@@ -7,4 +7,8 @@ migrate:
 
 .PHONY: run
 run: migrate
-	DATABASE_DSN="root:password@(127.0.0.1:3306)/diary?parseTime=true" go run ./cmd/diary
+	air
+
+.PHONY: setup
+setup:
+	go install github.com/cosmtrek/air@latest
