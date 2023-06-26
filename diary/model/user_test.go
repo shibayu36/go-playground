@@ -1,7 +1,6 @@
 package model
 
 import (
-	"errors"
 	"strings"
 	"testing"
 
@@ -32,7 +31,7 @@ func TestValidateUser(t *testing.T) {
 				email: strings.Repeat("a", 256) + "@gmail.com",
 				name:  "shibayu36",
 			},
-			errors.New("email is too long"),
+			&ValidationError{"email is too long"},
 		},
 		{
 			"email is invalid",
@@ -40,7 +39,7 @@ func TestValidateUser(t *testing.T) {
 				email: "shibayu36",
 				name:  "shibayu36",
 			},
-			errors.New("email is invalid"),
+			&ValidationError{"email is invalid"},
 		},
 		{
 			"name is too short",
@@ -48,7 +47,7 @@ func TestValidateUser(t *testing.T) {
 				email: "shibayu36@gmail.com",
 				name:  "sh",
 			},
-			errors.New("name is too short"),
+			&ValidationError{"name is too short"},
 		},
 		{
 			"name is too long",
@@ -56,7 +55,7 @@ func TestValidateUser(t *testing.T) {
 				email: "shibayu36@gmail.com",
 				name:  strings.Repeat("a", 256),
 			},
-			errors.New("name is too long"),
+			&ValidationError{"name is too long"},
 		},
 	}
 
