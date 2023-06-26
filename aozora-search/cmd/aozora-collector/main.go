@@ -79,14 +79,16 @@ func findEntries(siteURL string) ([]Entry, error) {
 		author, zipURL := findAuthorAndZIP(pageURL)
 
 		if zipURL != "" {
-			entries = append(entries, Entry{
+			entry := Entry{
 				AuthorID: token[1],
 				Author:   author,
 				TitleID:  token[2],
 				Title:    elem.Text(),
 				SiteURL:  siteURL,
 				ZipURL:   zipURL,
-			})
+			}
+			entries = append(entries, entry)
+			log.Printf("found %+v", entry)
 		}
 	})
 
@@ -99,7 +101,7 @@ func findAuthorAndZIP(siteURL string) (string, string) {
 		return "", ""
 	}
 
-	author := doc.Find("table[summary= 作家データ ] tr:nth-child(1) td:nth-child(2)").Text()
+	author := doc.Find("table[summary= 作家データ ] tr:nth-child(2) td:nth-child(2)").Text()
 
 	zipURL := ""
 	doc.Find("table.download a").Each(func(n int, elem *goquery.Selection) {
