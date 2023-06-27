@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -16,7 +15,8 @@ import (
 
 func TestChannel(t *testing.T) {
 	// if make(chan int) is used without goroutine, it will cause deadlock
-	ch := make(chan int)
-	ch <- 1
-	fmt.Println(<-ch)
+
+	// ch := make(chan int)
+	// ch <- 1
+	// fmt.Println(<-ch)
 }
