@@ -3,8 +3,11 @@ package main
 import (
 	"context"
 	"database/sql"
+	"embed"
 	"errors"
 	"fmt"
+	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"time"
@@ -16,6 +19,9 @@ import (
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/extra/bundebug"
 )
+
+//go:embed templates
+var templates embed.FS
 
 func main() {
 	sqldb, err := sql.Open("postgres", "postgres://username:password@localhost:5432/todo?sslmode=disable")
@@ -38,10 +44,17 @@ func main() {
 	}
 
 	e := echo.New()
+	e.Renderer = &Template{
+		templates: template.Must(template.New("").
+			Funcs(template.FuncMap{
+				"FormatDateTime": formatDateTime,
+			}).ParseFS(templates, "templates/*")),
+	}
 
 	h := &handlers{e: e, db: db}
 
 	e.GET("/", h.index)
+	e.POST("/", h.indexPost)
 	e.Logger.Fatal(e.Start(":8989"))
 }
 
@@ -153,4 +166,19 @@ func renderBadRequest(c echo.Context, errs any) error {
 	}
 
 	return c.Render(http.StatusBadRequest, "index", Data{Errors: retErrors})
+}
+
+type Template struct {
+	templates *template.Template
+}
+
+func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+	return t.templates.ExecuteTemplate(w, name, data)
+}
+
+func formatDateTime(d time.Time) string {
+	if d.IsZero() {
+		return ""
+	}
+	return d.Format("2006-01-02 15:04")
 }
