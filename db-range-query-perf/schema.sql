@@ -1,3 +1,7 @@
+-- mysqladmin -u root drop db-range-query-perf
+-- mysqladmin -u root create db-range-query-perf
+-- mysql -u root db-range-query-perf < db-range-query-perf/schema.sql
+
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL
