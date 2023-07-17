@@ -22,4 +22,5 @@ CREATE TABLE posts (
     body TEXT NOT NULL,
     posted_at DATETIME NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
 );

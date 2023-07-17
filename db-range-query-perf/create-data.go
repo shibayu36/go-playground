@@ -43,13 +43,14 @@ func CreateNUsersWithPosts(db *sql.DB, uCount int, pCount int) error {
 		userIDs[i] = int(id)
 
 		// Create posts with bulk insert using squirrel
-		insertBuilder := psql.Insert("posts").Columns("user_id", "body", "posted_at")
+		insertBuilder := psql.Insert("posts").Columns("user_id", "body", "posted_at", "deleted")
 
 		for j := 0; j < pCount; j++ {
 			insertBuilder = insertBuilder.Values(
 				userIDs[i],
 				fmt.Sprintf("Post %d of User%d", j+1, userIDs[i]),
 				randomPostedAt(),
+				randomDeleted(),
 			)
 		}
 
@@ -93,11 +94,15 @@ func randomPostedAt() time.Time {
 	diff := now.Unix() - twoMonthAgo.Unix()
 
 	// ランダムな差分を生成
-	rand.Seed(time.Now().UnixNano())
 	randomDiff := rand.Int63n(diff)
 
 	// ランダムな時刻を生成
 	randomTime := twoMonthAgo.Add(time.Duration(randomDiff) * time.Second)
 
 	return randomTime
+}
+
+// 0.1%の確率でtrueを返す
+func randomDeleted() bool {
+	return rand.Intn(1000) == 0
 }
