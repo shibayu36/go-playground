@@ -20,5 +20,6 @@ CREATE TABLE posts (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
     user_id INTEGER NOT NULL,
     body TEXT NOT NULL,
+    posted_at DATETIME NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );

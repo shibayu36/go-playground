@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"math/rand"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	_ "github.com/go-sql-driver/mysql"
@@ -29,7 +31,7 @@ func CreateNUsersWithPosts(db *sql.DB, uCount int, pCount int) error {
 
 	userIDs := make([]int, uCount)
 	for i := 0; i < uCount; i++ {
-		res, err := db.Exec("INSERT INTO users (name) VALUES (?)", fmt.Sprintf("user%d", i))
+		res, err := db.Exec("INSERT INTO users (name) VALUES (?)", fmt.Sprintf("user%d", i+1))
 		if err != nil {
 			return err
 		}
@@ -41,10 +43,14 @@ func CreateNUsersWithPosts(db *sql.DB, uCount int, pCount int) error {
 		userIDs[i] = int(id)
 
 		// Create posts with bulk insert using squirrel
-		insertBuilder := psql.Insert("posts").Columns("user_id", "body")
+		insertBuilder := psql.Insert("posts").Columns("user_id", "body", "posted_at")
 
 		for j := 0; j < pCount; j++ {
-			insertBuilder = insertBuilder.Values(userIDs[i], fmt.Sprintf("Post %d of User%d", j, userIDs[i]))
+			insertBuilder = insertBuilder.Values(
+				userIDs[i],
+				fmt.Sprintf("Post %d of User%d", j+1, userIDs[i]),
+				randomPostedAt(),
+			)
 		}
 
 		query, args, err := insertBuilder.ToSql()
@@ -77,4 +83,21 @@ func CreateNUsersWithPosts(db *sql.DB, uCount int, pCount int) error {
 	}
 
 	return nil
+}
+
+// 2ヶ月前から現在までの間でランダムに時刻を生成します。
+func randomPostedAt() time.Time {
+	now := time.Now()
+	twoMonthAgo := now.AddDate(0, -2, 0)
+
+	diff := now.Unix() - twoMonthAgo.Unix()
+
+	// ランダムな差分を生成
+	rand.Seed(time.Now().UnixNano())
+	randomDiff := rand.Int63n(diff)
+
+	// ランダムな時刻を生成
+	randomTime := twoMonthAgo.Add(time.Duration(randomDiff) * time.Second)
+
+	return randomTime
 }
