@@ -21,6 +21,7 @@ CREATE TABLE posts (
     user_id INTEGER NOT NULL,
     body TEXT NOT NULL,
     posted_at DATETIME NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id)
     deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    KEY idx_user_id_posted_at (user_id, posted_at)
 );
