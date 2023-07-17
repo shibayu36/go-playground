@@ -25,3 +25,4 @@ CREATE TABLE posts (
     FOREIGN KEY (user_id) REFERENCES users(id),
     KEY idx_user_id_posted_at (user_id, posted_at)
 );
+-- ALTER TABLE posts ADD KEY idx_user_id_posted_at_deleted (user_id, posted_at, deleted)
