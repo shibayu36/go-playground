@@ -11,7 +11,7 @@ func generator(msg string) <-chan string {
 	go func() {
 		for i := 0; ; i++ {
 			ch <- fmt.Sprintf("%s %d", msg, i)
-			time.Sleep(time.Second)
+			time.Sleep(time.Millisecond * 100)
 		}
 	}()
 	return ch
@@ -23,7 +23,7 @@ func generatorWithQuit(msg string, quit <-chan bool) <-chan string {
 		for i := 0; ; i++ {
 			select {
 			case ch <- fmt.Sprintf("%s %d", msg, i):
-				time.Sleep(time.Second)
+				time.Sleep(time.Millisecond * 100)
 			case <-quit:
 				fmt.Println("Quit!")
 				return
@@ -106,7 +106,7 @@ func TestTimeoutLoop(t *testing.T) {
 
 func TestOverallTimeout(t *testing.T) {
 	ch := generator("Hello!")
-	timeout := time.After(3 * time.Second)
+	timeout := time.After(3 * time.Millisecond * 100)
 	for i := 0; i < 5; i++ {
 		select {
 		case s := <-ch:
@@ -120,7 +120,7 @@ func TestOverallTimeout(t *testing.T) {
 func TestOverallTimeoutWithQuit(t *testing.T) {
 	quit := make(chan bool)
 	ch := generatorWithQuit("Hello!", quit)
-	timeout := time.After(3 * time.Second)
+	timeout := time.After(3 * time.Millisecond * 100)
 	for i := 0; i < 5; i++ {
 		select {
 		case s := <-ch:

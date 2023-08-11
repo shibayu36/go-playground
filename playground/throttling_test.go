@@ -9,7 +9,7 @@ import (
 
 func downloadJSON(u string) {
 	println(u)
-	time.Sleep(time.Second * 1)
+	time.Sleep(time.Millisecond * 100)
 }
 
 func TestThrottling(t *testing.T) {

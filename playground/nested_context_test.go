@@ -15,13 +15,13 @@ func TestNestedContext(t *testing.T) {
 	defer childCancel()
 
 	go func() {
-		time.Sleep(time.Second * 2)
+		time.Sleep(time.Millisecond * 100 * 2)
 		cancel()
 	}()
 
 	go func() {
-		time.Sleep(time.Second * 3)
-		// time.Sleep(time.Second * 1)
+		time.Sleep(time.Millisecond * 100 * 3)
+		// time.Sleep(time.Millisecond * 100 * 1)
 		childCancel()
 	}()
 
