@@ -1,13 +1,14 @@
 package main
 
 import (
+	"encoding/xml"
 	"fmt"
 	"io"
 	"os"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
-	"github.com/jstemmer/go-junit-report/parser"
+	"github.com/jstemmer/go-junit-report/v2/junit"
+	parser "github.com/jstemmer/go-junit-report/v2/parser/gotest"
 )
 
 func TestJunitFormatter(t *testing.T) {
@@ -22,6 +23,17 @@ func TestJunitFormatter(t *testing.T) {
 	// この時点で、fileはio.Readerインターフェースを実装しています
 	reader := io.Reader(file)
 
-	report, _ := parser.Parse(reader, "")
-	spew.Dump(report)
+	report, _ := parser.NewParser().Parse(reader)
+	// spew.Dump(report)
+	testsuites := junit.CreateFromReport(report, "")
+
+	enc := xml.NewEncoder(os.Stdout)
+	enc.Indent("", "\t")
+	if err := enc.Encode(testsuites); err != nil {
+
+	}
+	if err := enc.Flush(); err != nil {
+
+	}
+	fmt.Fprintf(os.Stdout, "\n")
 }
