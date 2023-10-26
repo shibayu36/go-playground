@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCommonizeTimestamp(t *testing.T) {
@@ -35,7 +36,8 @@ func TestCommonizeTimestamp(t *testing.T) {
 		fmt.Println(st.Field(i).Name)
 	}
 
-	json.Unmarshal([]byte(jsonStr), &hoge)
+	err := json.Unmarshal([]byte(jsonStr), &hoge)
+	require.NoError(t, err)
 
 	// 構造体がネストされていたとしても、
 	assert.Equal(t, 1, hoge.ID)

@@ -11,6 +11,7 @@ import (
 	parser "github.com/jstemmer/go-junit-report/parser"
 	"github.com/jstemmer/go-junit-report/v2/junit"
 	parserv2 "github.com/jstemmer/go-junit-report/v2/parser/gotest"
+	"github.com/stretchr/testify/require"
 )
 
 func TestJunitFormatter(t *testing.T) {
@@ -26,7 +27,8 @@ func TestJunitFormatter(t *testing.T) {
 
 	report, _ := parser.Parse(reader, "")
 
-	formatter.JUnitReportXML(report, false, "", os.Stdout)
+	err = formatter.JUnitReportXML(report, false, "", os.Stdout)
+	require.NoError(t, err)
 }
 
 func TestJunitFormatterV2(t *testing.T) {
@@ -47,10 +49,10 @@ func TestJunitFormatterV2(t *testing.T) {
 	enc := xml.NewEncoder(os.Stdout)
 	enc.Indent("", "\t")
 	if err := enc.Encode(testsuites); err != nil {
-
+		t.Fatal(err)
 	}
 	if err := enc.Flush(); err != nil {
-
+		t.Fatal(err)
 	}
 	fmt.Fprintf(os.Stdout, "\n")
 }
