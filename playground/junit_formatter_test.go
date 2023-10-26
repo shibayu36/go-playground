@@ -14,7 +14,7 @@ import (
 )
 
 func TestJunitFormatter(t *testing.T) {
-	filepath := "/Users/shibayu36/Downloads/test-log2.txt"
+	filepath := "/Users/shibayu36/Downloads/test-log-minimum.txt"
 	file, err := os.Open(filepath)
 	if err != nil {
 		fmt.Printf("Failed to open file: %v\n", err)
@@ -30,7 +30,7 @@ func TestJunitFormatter(t *testing.T) {
 }
 
 func TestJunitFormatterV2(t *testing.T) {
-	filepath := "/Users/shibayu36/Downloads/test-log2.txt"
+	filepath := "/Users/shibayu36/Downloads/test-log-minimum.txt"
 	file, err := os.Open(filepath)
 	if err != nil {
 		fmt.Printf("Failed to open file: %v\n", err)
