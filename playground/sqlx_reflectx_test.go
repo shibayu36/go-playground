@@ -40,7 +40,7 @@ func TestSqlxReflectx(t *testing.T) {
 
 	m := reflectx.NewMapper("db")
 	fields := m.TypeMap(reflect.TypeOf(p))
-	for tagname, _ := range fields.Names {
+	for tagname := range fields.Names {
 		if !strings.Contains(tagname, ".") {
 			fmt.Println(tagname)
 		}

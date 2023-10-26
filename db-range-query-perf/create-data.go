@@ -20,7 +20,7 @@ func main() {
 
 	for i := 0; i < 10; i++ {
 		log.Printf("%d: Creating %d users with %d posts", i, 1000, 1000)
-		CreateNUsersWithPosts(db, 1000, 1000)
+		_ = CreateNUsersWithPosts(db, 1000, 1000)
 		log.Printf("%d: Created %d users with %d posts", i, 1000, 1000)
 	}
 }
