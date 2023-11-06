@@ -9,6 +9,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/shibayu36/go_todo_app/clock"
 	"github.com/shibayu36/go_todo_app/config"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func New(ctx context.Context, cfg *config.Config) (*sqlx.DB, func(), error) {
