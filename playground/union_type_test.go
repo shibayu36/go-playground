@@ -2,8 +2,8 @@ package main
 
 import "testing"
 
-func Test_PrintFallback(t *testing.T) {
-	PrintFallback(Fallback1{Field1: 1})
-	PrintFallback(Fallback2{Field2: "2"})
-	// PrintFallback(2) -> type error
+func Test_PrintAorB(t *testing.T) {
+	PrintAorB(A{Field1: 1})
+	PrintAorB(B{Field2: "2"})
+	// PrintAorB(2) // -> type error
 }

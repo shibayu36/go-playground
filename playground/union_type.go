@@ -2,23 +2,23 @@ package main
 
 import "fmt"
 
-type Fallback1 struct {
+type A struct {
 	Field1 int
 }
 
-type Fallback2 struct {
+type B struct {
 	Field2 string
 }
 
-type fallback interface {
-	Fallback1 | Fallback2
+type AorB interface {
+	A | B
 }
 
-func PrintFallback[T fallback](s T) {
+func PrintAorB[T AorB](s T) {
 	switch v := any(s).(type) {
-	case Fallback1:
+	case A:
 		fmt.Println(v.Field1)
-	case Fallback2:
+	case B:
 		fmt.Println(v.Field2)
 	}
 }
