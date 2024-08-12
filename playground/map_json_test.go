@@ -40,4 +40,11 @@ func TestMapJSON(t *testing.T) {
 	for name, bone := range bones {
 		fmt.Printf("%s: %+v\n", name, bone)
 	}
+
+	bytes, err := json.Marshal(bones)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("Marshaled:", string(bytes))
 }
