@@ -91,4 +91,65 @@ func TestReadWriteLock(t *testing.T) {
 			t.Error("WriteLock should be acquired")
 		}
 	})
+
+	t.Run("WriteLockはWriteLockもReadLockもブロックする", func(t *testing.T) {
+		l := &ReadWriteLock{}
+
+		writeLockWg := sync.WaitGroup{}
+		writeHasLock := make(chan struct{})
+		allowWriteToFinish := make(chan struct{})
+		writeLockWg.Add(1)
+		go func() {
+			defer writeLockWg.Done()
+			l.WriteLock()
+			close(writeHasLock)
+			<-allowWriteToFinish
+			l.WriteUnlock()
+		}()
+
+		// WriteLock()が行われるまで待機
+		<-writeHasLock
+
+		// 他のWriteLockがブロックされる
+		otherWriteHasLock := make(chan struct{})
+		go func() {
+			l.WriteLock()
+			close(otherWriteHasLock)
+			l.WriteUnlock()
+		}()
+		select {
+		case <-otherWriteHasLock:
+			t.Error("other WriteLock should not be acquired")
+		case <-time.After(10 * time.Millisecond):
+			// しばらくの間ロックを取得できない
+		}
+
+		// ReadLockがブロックされる
+		readHasLock := make(chan struct{})
+		go func() {
+			l.ReadLock()
+			close(readHasLock)
+			l.ReadUnlock()
+		}()
+		select {
+		case <-readHasLock:
+			t.Error("ReadLock should not be acquired")
+		case <-time.After(10 * time.Millisecond):
+			// しばらくの間ロックを取得できない
+		}
+
+		// 最初のWriteLockが終わる
+		close(allowWriteToFinish)
+		writeLockWg.Wait()
+
+		// 他のWriteLockもしくはReadLockが取得できることを確認
+		select {
+		case <-otherWriteHasLock:
+			t.Log("other WriteLock should be acquired")
+		case <-readHasLock:
+			t.Log("ReadLock should be acquired")
+		case <-time.After(10 * time.Millisecond):
+			t.Error("other WriteLock or ReadLock should be acquired")
+		}
+	})
 }
