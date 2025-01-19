@@ -3,11 +3,11 @@ package main
 import "sync"
 
 type Semaphore struct {
-	permits int        // 残っている許可数
+	permits uint       // 残っている許可数
 	cond    *sync.Cond // 許可数が不足している時に待機する条件変数
 }
 
-func NewSemaphore(permits int) *Semaphore {
+func NewSemaphore(permits uint) *Semaphore {
 	return &Semaphore{
 		permits: permits,
 		cond:    sync.NewCond(&sync.Mutex{}),
