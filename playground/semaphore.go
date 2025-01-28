@@ -30,8 +30,9 @@ func (s *Semaphore) Acquire() {
 func (s *Semaphore) Release() {
 	s.cond.L.Lock()
 	defer s.cond.L.Unlock()
-	if s.permits < s.maxPermits {
-		s.permits++
-	}
+	s.permits++
+	// if s.permits < s.maxPermits {
+	// 	s.permits++
+	// }
 	s.cond.Signal() // どれか一つに伝われば良い
 }
