@@ -35,16 +35,19 @@ func (c *MyChannel[T]) Send(v T) {
 }
 
 func (c *MyChannel[T]) Recv() T {
+	c.sendSem.Release()
+
 	c.recvSem.Acquire()
+
 	c.queueMu.Lock()
 	val := c.queue.Remove(c.queue.Front())
 	c.queueMu.Unlock()
-	c.sendSem.Release()
+
 	return val.(T)
 }
 
 func Test_MyChannel(t *testing.T) {
-	c := NewMyChannel[int](1)
+	c := NewMyChannel[int](0)
 	go func() {
 		c.Send(1)
 		fmt.Println("Sended 1")
@@ -55,6 +58,7 @@ func Test_MyChannel(t *testing.T) {
 		c.Send(3)
 		fmt.Println("Sended 3")
 	}()
+	time.Sleep(1 * time.Second)
 	fmt.Println("Recv: ", c.Recv())
 	fmt.Println("Recv: ", c.Recv())
 	fmt.Println("Recv: ", c.Recv())
