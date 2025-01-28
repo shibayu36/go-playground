@@ -1,6 +1,7 @@
 package main
 
 import (
+	"container/list"
 	"fmt"
 	"sync"
 	"testing"
@@ -8,25 +9,27 @@ import (
 )
 
 type MyChannel[T any] struct {
+	// 送信側のセマフォ。queueのsizeがmaxになったらブロックする
 	sendSem *Semaphore
+	// 受信側のセマフォ。queueが空の時にブロックする
 	recvSem *Semaphore
 
 	queueMu sync.Mutex
-	queue   []T
+	queue   *list.List
 }
 
 func NewMyChannel[T any](size uint) *MyChannel[T] {
 	return &MyChannel[T]{
 		sendSem: NewSemaphore(size),
 		recvSem: NewSemaphore(0),
-		queue:   make([]T, 0, size),
+		queue:   list.New(),
 	}
 }
 
 func (c *MyChannel[T]) Send(v T) {
 	c.sendSem.Acquire()
 	c.queueMu.Lock()
-	c.queue = append(c.queue, v)
+	c.queue.PushBack(v)
 	c.queueMu.Unlock()
 	c.recvSem.Release()
 }
@@ -34,11 +37,10 @@ func (c *MyChannel[T]) Send(v T) {
 func (c *MyChannel[T]) Recv() T {
 	c.recvSem.Acquire()
 	c.queueMu.Lock()
-	val := c.queue[0]
-	c.queue = c.queue[1:]
+	val := c.queue.Remove(c.queue.Front())
 	c.queueMu.Unlock()
 	c.sendSem.Release()
-	return val
+	return val.(T)
 }
 
 func Test_MyChannel(t *testing.T) {
