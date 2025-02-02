@@ -6,18 +6,21 @@ import (
 )
 
 func Test_MyContext(t *testing.T) {
-
 	t.Run("500ms後にcancel", func(t *testing.T) {
 		ctx, cancel := NewMyContextWithCancel(NewMyContextBackground())
-		go func() {
-			time.Sleep(500 * time.Millisecond)
-			cancel()
-		}()
+
+		select {
+		case <-ctx.Done():
+			t.Fatal("ctx.Done() should be blocked")
+		default:
+		}
+
+		cancel()
 
 		select {
 		case <-ctx.Done():
 			// 一定時間後にctx.Done()を抜けられる
-		case <-time.After(1 * time.Second):
+		case <-time.After(100 * time.Millisecond):
 			t.Fatal("Timeout")
 		}
 	})
@@ -27,15 +30,22 @@ func Test_MyContext(t *testing.T) {
 		child1, _ := NewMyContextWithCancel(parent)
 		child2, _ := NewMyContextWithCancel(parent)
 
-		go func() {
-			time.Sleep(100 * time.Millisecond)
-			cancel()
-		}()
+		select {
+		case <-parent.Done():
+			t.Fatal("parent context was not blocked")
+		case <-child1.Done():
+			t.Fatal("child1 context was not blocked")
+		case <-child2.Done():
+			t.Fatal("child2 context was not blocked")
+		default:
+		}
+
+		cancel()
 
 		// 全てのコンテキストのDone()チャネルがcloseされることを確認
 		select {
 		case <-parent.Done():
-			// parentがキャンセルされたことを確認
+			// parentがキャンセルされた
 		case <-time.After(1 * time.Second):
 			t.Fatal("parent context was not cancelled")
 		}
