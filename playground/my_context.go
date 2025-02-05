@@ -2,7 +2,10 @@ package main
 
 import (
 	"sync"
+	"sync/atomic"
 )
+
+var goroutineCnt = atomic.Int64{}
 
 type MyContext interface {
 	Done() <-chan struct{}
@@ -53,6 +56,7 @@ func (c *MyContextWithCancel) propagateCancel(parent MyContext) {
 		return
 	}
 
+	goroutineCnt.Add(1)
 	go func() {
 		select {
 		case <-parentDone:
