@@ -21,9 +21,9 @@ func (c *MyContextBackground) Done() <-chan struct{} {
 	return nil
 }
 
-type MyContextWithCancel struct {
+type myCancelCtx struct {
 	parent   MyContext
-	children map[*MyContextWithCancel]struct{} // done伝播のためにchildrenを保持
+	children map[*myCancelCtx]struct{} // done伝播のためにchildrenを保持
 
 	done     chan struct{}
 	doneOnce sync.Once
@@ -31,15 +31,15 @@ type MyContextWithCancel struct {
 	mu sync.Mutex
 }
 
-func NewMyContextWithCancel(parent MyContext) (*MyContextWithCancel, func()) {
+func NewMyContextWithCancel(parent MyContext) (*myCancelCtx, func()) {
 	if parent == nil {
 		panic("cannot create context from nil parent")
 	}
 
 	done := make(chan struct{})
-	ctx := &MyContextWithCancel{
+	ctx := &myCancelCtx{
 		parent:   parent,
-		children: make(map[*MyContextWithCancel]struct{}),
+		children: make(map[*myCancelCtx]struct{}),
 		done:     done,
 	}
 	ctx.propagateCancel()
@@ -47,11 +47,11 @@ func NewMyContextWithCancel(parent MyContext) (*MyContextWithCancel, func()) {
 	return ctx, func() { ctx.cancel(true) }
 }
 
-func (c *MyContextWithCancel) Done() <-chan struct{} {
+func (c *myCancelCtx) Done() <-chan struct{} {
 	return c.done
 }
 
-func (c *MyContextWithCancel) cancel(removeFromParent bool) {
+func (c *myCancelCtx) cancel(removeFromParent bool) {
 	c.doneOnce.Do(func() {
 		c.mu.Lock()
 		defer c.mu.Unlock()
@@ -65,7 +65,7 @@ func (c *MyContextWithCancel) cancel(removeFromParent bool) {
 
 		if removeFromParent {
 			// 親がMyContextWithCancelの場合は、親のchildrenから自分を削除して伝播の対象から外す
-			parentCtx, ok := c.parent.(*MyContextWithCancel)
+			parentCtx, ok := c.parent.(*myCancelCtx)
 			if ok {
 				parentCtx.removeChild(c)
 			}
@@ -73,14 +73,14 @@ func (c *MyContextWithCancel) cancel(removeFromParent bool) {
 	})
 }
 
-func (c *MyContextWithCancel) propagateCancel() {
+func (c *myCancelCtx) propagateCancel() {
 	parentDone := c.parent.Done()
 	if parentDone == nil {
 		return
 	}
 
 	// 親がMyContextWithCancelの場合は、MyContextWithCancelのcancel側でchildrenに伝播するやり方に任せる
-	if parentCtx, ok := c.parent.(*MyContextWithCancel); ok {
+	if parentCtx, ok := c.parent.(*myCancelCtx); ok {
 		parentCtx.mu.Lock()
 		parentCtx.children[c] = struct{}{}
 		parentCtx.mu.Unlock()
@@ -99,7 +99,7 @@ func (c *MyContextWithCancel) propagateCancel() {
 	}()
 }
 
-func (c *MyContextWithCancel) removeChild(child *MyContextWithCancel) {
+func (c *myCancelCtx) removeChild(child *myCancelCtx) {
 	c.mu.Lock()
 	delete(c.children, child)
 	c.mu.Unlock()
