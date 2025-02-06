@@ -92,6 +92,20 @@ func Test_MyContext_PropagateCancel(t *testing.T) {
 		}
 	})
 
+	t.Run("すでに親がcancelされているならすぐに自分もcancelされる", func(t *testing.T) {
+		parent, cancel := NewMyContextWithCancel(NewMyContextBackground())
+		cancel()
+
+		child, _ := NewMyContextWithCancel(parent)
+
+		select {
+		case <-child.Done():
+			// childがキャンセルされたことを確認
+		default:
+			t.Fatal("child context was not cancelled")
+		}
+	})
+
 	t.Run("独自Contextを待ってcancelされる", func(t *testing.T) {
 		// - myTestContext
 		//   - myCancelCtx

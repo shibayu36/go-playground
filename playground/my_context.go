@@ -58,6 +58,7 @@ func (c *myCancelCtx) cancel(removeFromParent bool) {
 
 		close(c.done)
 
+		// 子を全てcancelする
 		for child := range c.children {
 			child.cancel(false)
 		}
@@ -74,9 +75,18 @@ func (c *myCancelCtx) cancel(removeFromParent bool) {
 }
 
 func (c *myCancelCtx) propagateCancel() {
+	// 親がcancelされることがないなら伝播を考える必要はない
 	parentDone := c.parent.Done()
 	if parentDone == nil {
 		return
+	}
+
+	// すでに親がcancelされているならすぐさま自分もcancelする
+	select {
+	case <-parentDone:
+		c.cancel(false)
+		return
+	default:
 	}
 
 	// 親がMyContextWithCancelの場合は、MyContextWithCancelのcancel側でchildrenに伝播するやり方に任せる
