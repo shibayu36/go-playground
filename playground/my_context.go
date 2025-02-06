@@ -22,8 +22,13 @@ func (c *MyContextBackground) Done() <-chan struct{} {
 }
 
 type MyContextWithCancel struct {
+	parent   MyContext
+	children map[*MyContextWithCancel]struct{} // done伝播のためにchildrenを保持
+
 	done     chan struct{}
 	doneOnce sync.Once
+
+	mu sync.Mutex
 }
 
 func NewMyContextWithCancel(parent MyContext) (*MyContextWithCancel, func()) {
@@ -33,36 +38,69 @@ func NewMyContextWithCancel(parent MyContext) (*MyContextWithCancel, func()) {
 
 	done := make(chan struct{})
 	ctx := &MyContextWithCancel{
-		done: done,
+		parent:   parent,
+		children: make(map[*MyContextWithCancel]struct{}),
+		done:     done,
 	}
-	ctx.propagateCancel(parent)
+	ctx.propagateCancel()
 
-	return ctx, ctx.cancel
+	return ctx, func() { ctx.cancel(true) }
 }
 
 func (c *MyContextWithCancel) Done() <-chan struct{} {
 	return c.done
 }
 
-func (c *MyContextWithCancel) cancel() {
+func (c *MyContextWithCancel) cancel(removeFromParent bool) {
 	c.doneOnce.Do(func() {
+		c.mu.Lock()
+		defer c.mu.Unlock()
+
 		close(c.done)
+
+		for child := range c.children {
+			child.cancel(false)
+		}
+		c.children = nil
+
+		if removeFromParent {
+			// 親がMyContextWithCancelの場合は、親のchildrenから自分を削除して伝播の対象から外す
+			parentCtx, ok := c.parent.(*MyContextWithCancel)
+			if ok {
+				parentCtx.removeChild(c)
+			}
+		}
 	})
 }
 
-func (c *MyContextWithCancel) propagateCancel(parent MyContext) {
-	parentDone := parent.Done()
+func (c *MyContextWithCancel) propagateCancel() {
+	parentDone := c.parent.Done()
 	if parentDone == nil {
 		return
 	}
 
+	// 親がMyContextWithCancelの場合は、MyContextWithCancelのcancel側でchildrenに伝播するやり方に任せる
+	if parentCtx, ok := c.parent.(*MyContextWithCancel); ok {
+		parentCtx.mu.Lock()
+		parentCtx.children[c] = struct{}{}
+		parentCtx.mu.Unlock()
+		return
+	}
+
+	// c.Done()での観察でしか伝播できない場合はgoroutineを起動して待つ
 	goroutineCnt.Add(1)
 	go func() {
 		select {
 		case <-parentDone:
-			c.cancel()
+			c.cancel(false)
 		case <-c.Done():
 			// 自分がキャンセルされたら親のDone待ちを抜ける
 		}
 	}()
+}
+
+func (c *MyContextWithCancel) removeChild(child *MyContextWithCancel) {
+	c.mu.Lock()
+	delete(c.children, child)
+	c.mu.Unlock()
 }

@@ -46,21 +46,21 @@ func Test_MyContext(t *testing.T) {
 		select {
 		case <-parent.Done():
 			// parentがキャンセルされた
-		case <-time.After(1 * time.Second):
+		default:
 			t.Fatal("parent context was not cancelled")
 		}
 
 		select {
 		case <-child1.Done():
 			// child1がキャンセルされたことを確認
-		case <-time.After(100 * time.Millisecond):
+		default:
 			t.Fatal("child1 context was not cancelled")
 		}
 
 		select {
 		case <-child2.Done():
 			// child2がキャンセルされたことを確認
-		case <-time.After(100 * time.Millisecond):
+		default:
 			t.Fatal("child2 context was not cancelled")
 		}
 	})
