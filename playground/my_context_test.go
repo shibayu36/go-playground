@@ -2,6 +2,8 @@ package main
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_MyContext(t *testing.T) {
@@ -38,6 +40,8 @@ func Test_MyContext(t *testing.T) {
 			t.Fatal("child2 context was not blocked")
 		default:
 		}
+
+		assert.Equal(t, goroutineCnt.Load(), int64(0), "Done()待ちのgoroutineは起動していない")
 
 		cancel()
 
