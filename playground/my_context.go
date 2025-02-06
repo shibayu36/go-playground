@@ -90,6 +90,7 @@ func (c *myCancelCtx) propagateCancel() {
 	// c.Done()での観察でしか伝播できない場合はgoroutineを起動して待つ
 	goroutineCnt.Add(1)
 	go func() {
+		defer goroutineCnt.Add(-1)
 		select {
 		case <-parentDone:
 			c.cancel(false)
