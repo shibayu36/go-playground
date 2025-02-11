@@ -226,8 +226,51 @@ func Test_MyContext_WithDeadline(t *testing.T) {
 		select {
 		case <-child.Done():
 			// childがキャンセルされた
-		case <-time.After(100 * time.Millisecond):
+		default:
 			t.Fatal("child context was not cancelled")
+		}
+	})
+
+	t.Run("myTimerCtxを待つ時、goroutineが起動しない", func(t *testing.T) {
+		goroutineCnt.Store(0)
+
+		myTimerCtx, myTimerCtxCancel := NewMyContextWithDeadline(NewMyContextBackground(), time.Now().Add(100*time.Millisecond))
+		myCancelCtx1, _ := NewMyContextWithCancel(myTimerCtx)
+		myCancelCtx2, _ := NewMyContextWithCancel(myTimerCtx)
+
+		select {
+		case <-myTimerCtx.Done():
+			t.Fatal("myTimerCtx was not blocked")
+		case <-myCancelCtx1.Done():
+			t.Fatal("myCancelCtx1 was not blocked")
+		case <-myCancelCtx2.Done():
+			t.Fatal("myCancelCtx2 was not blocked")
+		default:
+		}
+
+		assert.Equal(t, int64(0), goroutineCnt.Load(), "goroutineが起動していない")
+
+		myTimerCtxCancel()
+
+		select {
+		case <-myTimerCtx.Done():
+			// キャンセルされた
+		default:
+			t.Fatal("myTimerCtx was not cancelled")
+		}
+
+		select {
+		case <-myCancelCtx1.Done():
+			// 子もキャンセルされた
+		default:
+			t.Fatal("myCancelCtx1 was not cancelled")
+		}
+
+		select {
+		case <-myCancelCtx2.Done():
+			// 子もキャンセルされた
+		default:
+			t.Fatal("myCancelCtx2 was not cancelled")
 		}
 	})
 }

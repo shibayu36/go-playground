@@ -66,8 +66,8 @@ func (c *myCancelCtx) cancel(removeFromParent bool) {
 		c.children = nil
 
 		if removeFromParent {
-			// 親がMyContextWithCancelの場合は、親のchildrenから自分を削除して伝播の対象から外す
-			parentCtx, ok := c.parent.(*myCancelCtx)
+			// 親がchildrenを持つパターンの場合、親のchildrenから自分を削除して伝播の対象から外す
+			parentCtx, ok := parentCancelCtx(c.parent)
 			if ok {
 				parentCtx.removeChild(c)
 			}
@@ -90,8 +90,8 @@ func (c *myCancelCtx) propagateCancel() {
 	default:
 	}
 
-	// 親がMyContextWithCancelの場合は、MyContextWithCancelのcancel側でchildrenに伝播するやり方に任せる
-	if parentCtx, ok := c.parent.(*myCancelCtx); ok {
+	// 親がchildrenを持つパターンの場合、親から子に伝播するやり方に任せ、goroutine待ちしない
+	if parentCtx, ok := parentCancelCtx(c.parent); ok {
 		parentCtx.mu.Lock()
 		parentCtx.children[c] = struct{}{}
 		parentCtx.mu.Unlock()
@@ -165,4 +165,17 @@ func (c *myTimerCtx) cancel(removeFromParent bool) {
 		c.timer = nil
 	}
 	c.mu.Unlock()
+}
+
+// parentCancelCtx parentがchildrenを保持して伝播するパターンの場合、親のmyCancelCtxを返す
+func parentCancelCtx(parent MyContext) (*myCancelCtx, bool) {
+	if p, ok := parent.(*myCancelCtx); ok {
+		return p, true
+	}
+
+	if p, ok := parent.(*myTimerCtx); ok {
+		return &p.myCancelCtx, true
+	}
+
+	return nil, false
 }
