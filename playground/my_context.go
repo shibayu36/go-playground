@@ -3,6 +3,7 @@ package main
 import (
 	"sync"
 	"sync/atomic"
+	"time"
 )
 
 var goroutineCnt = atomic.Int64{}
@@ -113,5 +114,55 @@ func (c *myCancelCtx) propagateCancel() {
 func (c *myCancelCtx) removeChild(child *myCancelCtx) {
 	c.mu.Lock()
 	delete(c.children, child)
+	c.mu.Unlock()
+}
+
+type myTimerCtx struct {
+	myCancelCtx
+	timer *time.Timer // myCancelCtxのmuを使って保護
+
+	deadline time.Time
+}
+
+func NewMyContextWithDeadline(parent MyContext, deadline time.Time) (*myTimerCtx, func()) {
+	if parent == nil {
+		panic("cannot create context from nil parent")
+	}
+
+	ctx := &myTimerCtx{
+		myCancelCtx: myCancelCtx{
+			parent:   parent,
+			children: make(map[*myCancelCtx]struct{}),
+			done:     make(chan struct{}),
+		},
+		deadline: deadline,
+	}
+	ctx.propagateCancel()
+
+	duration := time.Until(deadline)
+	if duration <= 0 {
+		// すでに過ぎているならすぐにcancelする
+		ctx.cancel(true)
+		return ctx, func() { ctx.cancel(false) }
+	}
+
+	ctx.mu.Lock()
+	ctx.timer = time.AfterFunc(duration, func() {
+		// durationが過ぎたら自動でcancel
+		ctx.cancel(true)
+	})
+	ctx.mu.Unlock()
+
+	return ctx, func() { ctx.cancel(true) }
+}
+
+func (c *myTimerCtx) cancel(removeFromParent bool) {
+	c.myCancelCtx.cancel(removeFromParent)
+
+	c.mu.Lock()
+	if c.timer != nil {
+		c.timer.Stop()
+		c.timer = nil
+	}
 	c.mu.Unlock()
 }

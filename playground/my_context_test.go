@@ -149,3 +149,85 @@ func Test_MyContext_PropagateCancel(t *testing.T) {
 		}
 	})
 }
+
+func Test_MyContext_WithDeadline(t *testing.T) {
+	t.Run("deadlineが来たらcancelされる", func(t *testing.T) {
+		ctx, _ := NewMyContextWithDeadline(NewMyContextBackground(), time.Now().Add(100*time.Millisecond))
+
+		select {
+		case <-ctx.Done():
+			t.Fatal("ctx.Done() should be blocked")
+		default:
+		}
+
+		time.Sleep(110 * time.Millisecond)
+
+		select {
+		case <-ctx.Done():
+			// キャンセルされた
+		default:
+			t.Fatal("ctx.Done() should be closed")
+		}
+	})
+
+	t.Run("すでにdeadlineが来ているならすぐにcancelされる", func(t *testing.T) {
+		ctx, _ := NewMyContextWithDeadline(NewMyContextBackground(), time.Now().Add(-100*time.Millisecond))
+
+		select {
+		case <-ctx.Done():
+			// キャンセルされた
+		default:
+			t.Fatal("ctx.Done() should be closed")
+		}
+	})
+
+	t.Run("cancelを手動で呼ぶとcancelされる", func(t *testing.T) {
+		ctx, cancel := NewMyContextWithDeadline(NewMyContextBackground(), time.Now().Add(100*time.Millisecond))
+
+		select {
+		case <-ctx.Done():
+			t.Fatal("ctx.Done() should be blocked")
+		default:
+		}
+
+		cancel()
+
+		select {
+		case <-ctx.Done():
+			// キャンセルされた
+		default:
+			t.Fatal("ctx.Done() should be closed")
+		}
+
+		// その後、Deadlineが来てもエラーにならない
+		time.Sleep(110 * time.Millisecond)
+		select {
+		case <-ctx.Done():
+			// キャンセルされた
+		default:
+			t.Fatal("ctx.Done() should be closed")
+		}
+	})
+
+	t.Run("親がキャンセルされたら子もキャンセルされる", func(t *testing.T) {
+		parent, cancel := NewMyContextWithDeadline(NewMyContextBackground(), time.Now().Add(50*time.Millisecond))
+		child, _ := NewMyContextWithDeadline(parent, time.Now().Add(1000*time.Millisecond))
+
+		select {
+		case <-parent.Done():
+			t.Fatal("parent context was not blocked")
+		case <-child.Done():
+			t.Fatal("child context was not blocked")
+		default:
+		}
+
+		cancel()
+
+		select {
+		case <-child.Done():
+			// childがキャンセルされた
+		case <-time.After(100 * time.Millisecond):
+			t.Fatal("child context was not cancelled")
+		}
+	})
+}
