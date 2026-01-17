@@ -1,6 +1,8 @@
 module github.com/shibayu36/go-playground
 
-go 1.20
+go 1.22
+
+toolchain go1.24.1
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
@@ -12,7 +14,8 @@ require (
 	github.com/jstemmer/go-junit-report/v2 v2.0.0
 	github.com/mattn/go-runewidth v0.0.14
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.8.4
+	github.com/slack-go/slack v0.17.3
+	github.com/stretchr/testify v1.10.0
 )
 
 require (
@@ -20,6 +23,7 @@ require (
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/getsentry/sentry-go v0.27.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
